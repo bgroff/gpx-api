@@ -75,12 +75,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @interface Metadata {
     NSString *name;
     NSString *desc;
-    Author *author
-    Copyright *copyright
-    NSMutableArray *link
+    Author *author;
+    Copyright *copyright;
+    NSMutableArray *link;
     NSDate *time;
     NSString *keywords;
-    Bounds *bounds
+    Bounds *bounds;
     // extension
 }
 @end
@@ -115,7 +115,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     NSString *cmt;
     NSString *desc;
     NSString *src;
-    NSMutalbeArray *link;
+    NSMutableArray *link;
     unsigned int number;
     NSString *type;
     // extensions

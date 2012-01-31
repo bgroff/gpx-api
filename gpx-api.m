@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - (id)init
 {
     NSAssert(NO, @"You must use the initWithHref to initialize this object");
+	return nil;
 }
 
 - (id) initWithHref: (NSURL*) inHref :(NSString*)inText :(NSString*)inType {
