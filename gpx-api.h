@@ -26,8 +26,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #import <Foundation/Foundation.h>
 
 
+#pragma mark Link
+
 @interface Link : NSObject {
-    NSURL *href;
+    NSURL    *href;
     NSString *text;
     NSString *type;
 }
@@ -39,7 +41,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - (id) initWithHref: (NSURL*) href :(NSString*)inText :(NSString*)inType;
 @end
 
-@interface Email {
+#pragma mark Email
+
+@interface Email : NSObject {
     NSString *user;
     NSString *domain;
 }
@@ -50,21 +54,35 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - (id) initWithUserAndDomain: (NSString*)inUser :(NSString*)inDomain;
 @end
 
-@interface Author {
+#pragma mark Person
+
+@interface Person : NSObject {
     NSString *name;
-    Email *email;
-    Link *link;
+    Email    *email;
+    Link     *link;
 }
+@property (retain) NSString* name;
+@property (retain) Email* email;
+@property (retain) Link* link;
 @end
 
-@interface Copyright {
+#pragma mark Copyright
+
+@interface Copyright : NSObject {
     NSString *author;
     NSString *year;
-    NSURL *license;
+    NSURL    *license;
 }
+@property (retain) NSString* author;
+@property (retain) NSString* year;
+@property (retain) NSURL* license;
+
+- (id) initWithValues: (NSString*)inAuthor :(NSString*)inYear :(NSURL*)inLicense;
 @end
 
-@interface Bounds {
+#pragma mark Bounds
+
+@interface Bounds : NSObject {
     float minlat;
     float minlon;
     float maxlat;
@@ -72,73 +90,80 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 @end
 
-@interface Metadata {
-    NSString *name;
-    NSString *desc;
-    Author *author;
-    Copyright *copyright;
-    NSMutableArray *link;
-    NSDate *time;
-    NSString *keywords;
-    Bounds *bounds;
+#pragma mark Metadata
+
+@interface Metadata : NSObject {
+    NSString		*name;
+    NSString		*desc;
+    Person			*author;
+    Copyright		*copyright;
+    NSMutableArray	*link;
+    NSDate			*time;
+    NSString		*keywords;
+	Bounds			*bounds;
     // extension
 }
+@property (retain) NSString* name;
+@property (retain) NSString* desc;
+@property (retain) Person* author;
+@property (retain) Copyright* copyright;
+@property (retain) NSDate* time;
+@property (retain) NSString* keywords;
+@property (retain) Bounds* bounds;
+
+- (void)addLink: (Link*)link;
 @end
 
-@interface Waypoint {
-    float lat;
-    float lon;
-    NSDecimal *eleNSDecimal;
-    NSDate *time;
-    float magvar;
-    NSDecimal *geoidheight;
-    NSString *name;
-    NSString *cmt;
-    NSString *desc;
-    NSString *src;
+@interface Waypoint : NSObject {
+    float          lat;
+    float          lon;
+    NSDecimal      *elev;
+    NSDate         *time;
+    float          magvar;
+    NSDecimal      *geoidheight;
+    NSString       *name;
+    NSString       *cmt;
+    NSString       *desc;
+    NSString       *src;
     NSMutableArray *link;
-    NSString *sym;
-    NSString *type;
-    NSString *fix; // Must be one of: {'none'|'2d'|'3d'|'dgps'|'pps'}
-    unsigned int sat;
-    NSDecimal *hdop;
-    NSDecimal *vdop;
-    NSDecimal *pdop;
-    NSDecimal *ageofdgpsdata;
-    unsigned int dgpsid;
+    NSString       *sym;
+    NSString       *type;
+    NSString       *fix; // Must be one of: {'none'|'2d'|'3d'|'dgps'|'pps'}
+    unsigned int   sat;
+    NSDecimal      *hdop;
+    NSDecimal      *vdop;
+    NSDecimal      *pdop;
+    NSDecimal      *ageofdgpsdata;
+    unsigned int   dgpsid;
     // extensions;
 }
 @end
 
 @interface Route {
-    NSString *name;
-    NSString *cmt;
-    NSString *desc;
-    NSString *src;
+    NSString       *name;
+    NSString       *cmt;
+    NSString       *desc;
+    NSString       *src;
     NSMutableArray *link;
-    unsigned int number;
-    NSString *type;
+    unsigned int   number;
+    NSString       *type;
     // extensions
     NSMutableArray *rtept;
 }
 @end
 
 @interface Trek {
-    NSString *name;
-    NSString *cmt;
-    NSString *desc;
-    NSString *src;
+    NSString       *name;
+    NSString       *cmt;
+    NSString       *desc;
+    NSString       *src;
     NSMutableArray *link;
-    unsigned int number;
-    NSString *type;
+    unsigned int   number;
+    NSString       *type;
     // extensions
     NSMutableArray *trkseg;
-
-    // Internal
-    NSMutableArray *currentSegment;
 }
-- (void)startNewSegment;
-- (void)addWaypoint:(Waypoint *)state;
+- (void)addWaypoint:(Waypoint *)waypoint;
 @end
 
 

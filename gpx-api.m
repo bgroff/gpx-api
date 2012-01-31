@@ -27,6 +27,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #import "gpx-api.h"
 
+#pragma mark Link
+
 @implementation Link
 @synthesize href;
 @synthesize text;
@@ -56,5 +58,85 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [super dealloc];
 }
 @end
+
+#pragma mark Email
+
+@implementation Email
+@synthesize user;
+@synthesize domain;
+
+- (id) init {
+	NSAssert(NO, @"You must use the initWithUserAndDomain to initialize this object");
+	return nil;
+}
+
+- (id) initWithUserAndDomain:(NSString *)inUser :(NSString *)inDomain {
+	self = [super init];
+    if(self) {
+        NSAssert(inUser != nil, @"inUser must be initialized before use");
+		NSAssert(inDomain != nil, @"inUser must be initialized before use");
+        self.user = inUser;
+        self.domain = inDomain;
+    }
+    return(self);
+}
+@end
+
+#pragma mark Person
+
+@implementation Person
+@synthesize name;
+@synthesize email;
+@synthesize link;
+@end
+
+#pragma mark Copyright
+
+@implementation Copyright
+@synthesize author;
+@synthesize year;
+@synthesize license;
+
+- (id) init {
+	NSAssert(NO, @"You must use the initWithValues to initialize this object");
+	return nil;
+}
+
+-(id) initWithValues:(NSString *)inAuthor :(NSString *)inYear :(NSURL *)inLicense {
+	self = [super init];
+    if(self) {
+        NSAssert(inAuthor != nil, @"inAuthor must be initialized before use");
+		self.author = inAuthor;
+        self.year = inYear;
+		self.license = inLicense;
+    }
+    return(self);
+}
+@end
+
+#pragma mark Metadata
+
+@implementation Metadata
+@synthesize name;
+@synthesize desc;
+@synthesize author;
+@synthesize copyright;
+@synthesize time;
+@synthesize keywords;
+@synthesize bounds;
+
+- (id) init {
+	self = [super init];
+    if(self) {
+		self.link = [[NSMutableArray alloc] init];
+    }
+    return(self);
+}
+
+- (void) addLink:(Link *)link {
+	[self.link addObject:link];
+}
+@end
+
 
 

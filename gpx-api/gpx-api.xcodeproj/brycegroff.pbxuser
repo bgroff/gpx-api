@@ -40,6 +40,19 @@
 			9F0A981814D7843C00F0C9DE /* PBXTextBookmark */ = 9F0A981814D7843C00F0C9DE /* PBXTextBookmark */;
 			9F0A981914D7843C00F0C9DE /* PBXTextBookmark */ = 9F0A981914D7843C00F0C9DE /* PBXTextBookmark */;
 			9F0A981A14D7843C00F0C9DE /* PBXTextBookmark */ = 9F0A981A14D7843C00F0C9DE /* PBXTextBookmark */;
+			9F0A982E14D78F8800F0C9DE /* XCBuildMessageTextBookmark */ = 9F0A982E14D78F8800F0C9DE /* XCBuildMessageTextBookmark */;
+			9F0A982F14D78F8800F0C9DE /* PBXTextBookmark */ = 9F0A982F14D78F8800F0C9DE /* PBXTextBookmark */;
+			9F0A983614D78FE500F0C9DE /* XCBuildMessageTextBookmark */ = 9F0A983614D78FE500F0C9DE /* XCBuildMessageTextBookmark */;
+			9F0A983714D78FE500F0C9DE /* PBXTextBookmark */ = 9F0A983714D78FE500F0C9DE /* PBXTextBookmark */;
+			9F0A983A14D78FFF00F0C9DE /* XCBuildMessageTextBookmark */ = 9F0A983A14D78FFF00F0C9DE /* XCBuildMessageTextBookmark */;
+			9F0A983B14D78FFF00F0C9DE /* PBXTextBookmark */ = 9F0A983B14D78FFF00F0C9DE /* PBXTextBookmark */;
+			9F0A984014D7921000F0C9DE /* PBXBookmark */ = 9F0A984014D7921000F0C9DE /* PBXBookmark */;
+			9F0A984114D7936900F0C9DE /* PBXTextBookmark */ = 9F0A984114D7936900F0C9DE /* PBXTextBookmark */;
+			9F0A984214D7936900F0C9DE /* XCBuildMessageTextBookmark */ = 9F0A984214D7936900F0C9DE /* XCBuildMessageTextBookmark */;
+			9F0A984314D7936900F0C9DE /* PBXTextBookmark */ = 9F0A984314D7936900F0C9DE /* PBXTextBookmark */;
+			9F0A984614D7936900F0C9DE /* PBXTextBookmark */ = 9F0A984614D7936900F0C9DE /* PBXTextBookmark */;
+			9F0A984714D7936900F0C9DE /* PBXTextBookmark */ = 9F0A984714D7936900F0C9DE /* PBXTextBookmark */;
+			9F0A984A14D7936900F0C9DE /* PBXTextBookmark */ = 9F0A984A14D7936900F0C9DE /* PBXTextBookmark */;
 		};
 		sourceControlManager = 9F0A97FD14D7831700F0C9DE /* Source Control */;
 		userBuildSettings = {
@@ -47,18 +60,18 @@
 	};
 	9F0A97F914D7831700F0C9DE /* gpx-api.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {691, 2223}}";
-			sepNavSelRange = "{2958, 0}";
-			sepNavVisRange = "{2746, 592}";
+			sepNavIntBoundsRect = "{{0, 0}, {645, 2171}}";
+			sepNavSelRange = "{3130, 0}";
+			sepNavVisRange = "{2546, 1263}";
 			sepNavWindowFrame = "{{15, 439}, {750, 558}}";
 		};
 	};
 	9F0A97FA14D7831700F0C9DE /* gpx-api.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {807, 793}}";
-			sepNavSelRange = "{1541, 0}";
-			sepNavVisRange = "{628, 1327}";
-			sepNavWindowFrame = "{{38, 418}, {750, 558}}";
+			sepNavIntBoundsRect = "{{0, 0}, {689, 1846}}";
+			sepNavSelRange = "{3524, 0}";
+			sepNavVisRange = "{2644, 889}";
+			sepNavWindowFrame = "{{414, 188}, {748, 756}}";
 		};
 	};
 	9F0A97FD14D7831700F0C9DE /* Source Control */ = {
@@ -81,7 +94,7 @@
 		fRef = 9F0A97F914D7831700F0C9DE /* gpx-api.h */;
 		fallbackIsa = XCBuildMessageTextBookmark;
 		rLen = 1;
-		rLoc = 117;
+		rLoc = 146;
 		rType = 1;
 	};
 	9F0A980814D7837A00F0C9DE /* PBXTextBookmark */ = {
@@ -89,7 +102,7 @@
 		fRef = 9F0A97F914D7831700F0C9DE /* gpx-api.h */;
 		name = "gpx-api.h: 118";
 		rLen = 0;
-		rLoc = 2958;
+		rLoc = 3872;
 		rType = 0;
 		vrLen = 268;
 		vrLoc = 2767;
@@ -99,7 +112,7 @@
 		fRef = 9F0A97F914D7831700F0C9DE /* gpx-api.h */;
 		name = "gpx-api.h: 79";
 		rLen = 0;
-		rLoc = 2185;
+		rLoc = 2674;
 		rType = 0;
 		vrLen = 697;
 		vrLoc = 1678;
@@ -119,7 +132,7 @@
 		fRef = 9F0A97FA14D7831700F0C9DE /* gpx-api.m */;
 		name = "gpx-api.m: 37";
 		rLen = 0;
-		rLoc = 1541;
+		rLoc = 1560;
 		rType = 0;
 		vrLen = 1249;
 		vrLoc = 706;
@@ -129,10 +142,130 @@
 		fRef = 9F0A97FA14D7831700F0C9DE /* gpx-api.m */;
 		name = "gpx-api.m: 37";
 		rLen = 0;
-		rLoc = 1541;
+		rLoc = 1560;
 		rType = 0;
 		vrLen = 1327;
 		vrLoc = 628;
+	};
+	9F0A982E14D78F8800F0C9DE /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "Expected specifier-qualifier-list before 'Bounds'";
+		fRef = 9F0A97F914D7831700F0C9DE /* gpx-api.h */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 102;
+		rType = 1;
+	};
+	9F0A982F14D78F8800F0C9DE /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 9F0A97F914D7831700F0C9DE /* gpx-api.h */;
+		name = "gpx-api.h: 102";
+		rLen = 0;
+		rLoc = 2772;
+		rType = 0;
+		vrLen = 379;
+		vrLoc = 2566;
+	};
+	9F0A983614D78FE500F0C9DE /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "No type or storage class may be specified here before 'interface'";
+		fRef = 9F0A97F914D7831700F0C9DE /* gpx-api.h */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 94;
+		rType = 1;
+	};
+	9F0A983714D78FE500F0C9DE /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 9F0A97F914D7831700F0C9DE /* gpx-api.h */;
+		name = "gpx-api.h: 94";
+		rLen = 0;
+		rLoc = 2577;
+		rType = 0;
+		vrLen = 267;
+		vrLoc = 2464;
+	};
+	9F0A983A14D78FFF00F0C9DE /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "Field 'bounds' has incomplete type";
+		fRef = 9F0A97F914D7831700F0C9DE /* gpx-api.h */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 102;
+		rType = 1;
+	};
+	9F0A983B14D78FFF00F0C9DE /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 9F0A97F914D7831700F0C9DE /* gpx-api.h */;
+		name = "gpx-api.h: 93";
+		rLen = 0;
+		rLoc = 2772;
+		rType = 0;
+		vrLen = 378;
+		vrLoc = 2432;
+	};
+	9F0A984014D7921000F0C9DE /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = 9F0A97FA14D7831700F0C9DE /* gpx-api.m */;
+	};
+	9F0A984114D7936900F0C9DE /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 9F0A97FA14D7831700F0C9DE /* gpx-api.m */;
+		name = "gpx-api.m: 117";
+		rLen = 0;
+		rLoc = 3533;
+		rType = 0;
+		vrLen = 983;
+		vrLoc = 2168;
+	};
+	9F0A984214D7936900F0C9DE /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "Field 'bounds' has incomplete type";
+		fRef = 9F0A97F914D7831700F0C9DE /* gpx-api.h */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 102;
+		rType = 1;
+	};
+	9F0A984314D7936900F0C9DE /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 9F0A97F914D7831700F0C9DE /* gpx-api.h */;
+		name = "gpx-api.h: 103";
+		rLen = 0;
+		rLoc = 2773;
+		rType = 0;
+		vrLen = 997;
+		vrLoc = 2263;
+	};
+	9F0A984614D7936900F0C9DE /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 9F0A97F914D7831700F0C9DE /* gpx-api.h */;
+		name = "gpx-api.h: 110";
+		rLen = 0;
+		rLoc = 2956;
+		rType = 0;
+		vrLen = 1252;
+		vrLoc = 2224;
+	};
+	9F0A984714D7936900F0C9DE /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 9F0A97F914D7831700F0C9DE /* gpx-api.h */;
+		name = "gpx-api.h: 117";
+		rLen = 0;
+		rLoc = 3130;
+		rType = 0;
+		vrLen = 1263;
+		vrLoc = 2546;
+	};
+	9F0A984A14D7936900F0C9DE /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 9F0A97FA14D7831700F0C9DE /* gpx-api.m */;
+		name = "gpx-api.m: 138";
+		rLen = 0;
+		rLoc = 3524;
+		rType = 0;
+		vrLen = 889;
+		vrLoc = 2644;
 	};
 	AA747D9E0F9514B9006C5449 /* gpx_api_Prefix.pch */ = {
 		uiCtxt = {
