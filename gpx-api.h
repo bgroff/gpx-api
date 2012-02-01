@@ -164,7 +164,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - (void)addLink: (Link*)newLink;
 @end
 
-@interface Route {
+#pragma mark Route
+
+@interface Route : NSObject {
     NSString       *name;
     NSString       *cmt;
     NSString       *desc;
@@ -175,9 +177,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     // extensions
     NSMutableArray *rtept;
 }
+@property (retain) NSString* name;
+@property (retain) NSString* cmt;
+@property (retain) NSString* desc;
+@property (retain) NSString* src;
+@property (retain) NSMutableArray* link;
+@property unsigned int number;
+@property (retain) NSString* type;
+@property (retain) NSMutableArray* rtept;
+
+- (void)addLink: (Link*)newLink;
+- (void)addWaypoint:(Waypoint *)waypoint;
 @end
 
-@interface Trek {
+#pragma mark Trek
+
+@interface Trek : NSObject {
     NSString       *name;
     NSString       *cmt;
     NSString       *desc;
@@ -188,7 +203,36 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     // extensions
     NSMutableArray *trkseg;
 }
+@property (retain) NSString* name;
+@property (retain) NSString* cmt;
+@property (retain) NSString* desc;
+@property (retain) NSString* src;
+@property (retain) NSMutableArray* link;
+@property unsigned int number;
+@property (retain) NSString* type;
+@property (retain) NSMutableArray* trekseg;
+
+- (void)addLink: (Link*)newLink;
 - (void)addWaypoint:(Waypoint *)waypoint;
 @end
 
+#pragma mark GPX
 
+@interface GPX : NSObject {
+    NSString        *version;
+    NSString        *creator;
+
+    Metadata        *metadata;
+    NSMutableArray  *waypoints;
+    NSMutableArray  *routes;
+    NSMutableArray  *treks;
+}
+@property (retain) Metadata* metadata;
+@property (retain) NSMutableArray* waypoints;
+@property (retain) NSMutableArray* routes;
+@property (retain) NSMutableArray* treks;
+
+- (void) addWaypoint:(Waypoint*) waypoint;
+- (void) addRoute:(Route *) route;
+- (void) addTrek:(Trek*) trek;
+@end

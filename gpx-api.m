@@ -95,6 +95,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @synthesize name;
 @synthesize email;
 @synthesize link;
+
+- (void) dealloc {
+    [name release];
+    [email release];
+    [link release];
+    [super dealloc];
+}
 @end
 
 #pragma mark Copyright
@@ -141,16 +148,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @synthesize keywords;
 @synthesize bounds;
 
-- (id) init {
-	self = [super init];
-    if(self) {
-		link = [[NSMutableArray alloc] init];
+- (void) addLink:(Link *)newLink {
+    if (link == nil) {
+        link = [[NSMutableArray alloc] init];
     }
-    return(self);
+	[link addObject:newLink];
 }
 
-- (void) addLink:(Link *)newLink {
-	[link addObject:newLink];
+- (void) dealloc {
+    [name release];
+    [desc release];
+    [author release];
+    [copyright release];
+    [link release];
+    [time release];
+    [keywords release];
+    [bounds release];
+    [super dealloc];
 }
 @end
 
@@ -209,8 +223,146 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 
 - (void) addLink:(Link *)newLink {
-	[self.link addObject:newLink];
+	if (link == nil) {
+        link = [[NSMutableArray alloc] init];
+    }
+    [link addObject:newLink];
+}
+
+- (void) dealloc {
+    [time release];
+    [name release];
+    [cmt release];
+    [desc release];
+    [src release];
+    [link release];
+    [sym release];
+    [type release];
+    [super dealloc];
 }
 @end
 
+#pragma mark Route
 
+@implementation Route
+@synthesize name;
+@synthesize cmt;
+@synthesize desc;
+@synthesize src;
+@synthesize link;
+@synthesize number;
+@synthesize type;
+@synthesize rtept;
+
+- (void)addLink:(Link *)newLink {
+    if (link == nil) {
+        link = [[NSMutableArray alloc] init];
+    }
+    [link addObject:newLink];
+}
+
+- (void)addWaypoint:(Waypoint *)waypoint {
+    if (rtept == nil) {
+        rtept = [[NSMutableArray alloc] init];
+    }
+    [rtept addObject:waypoint];
+}
+
+- (void) dealloc {
+    [name release];
+    [cmt release];
+    [desc release];
+    [src release];
+    [link release];
+    [type release];
+    [rtept release];
+    [super dealloc];
+}
+@end
+
+#pragma mark Trek
+
+@implementation Trek
+@synthesize name;
+@synthesize cmt;
+@synthesize desc;
+@synthesize src;
+@synthesize link;
+@synthesize number;
+@synthesize type;
+@synthesize trekseg;
+
+- (void)addLink:(Link *)newLink {
+    if (link == nil) {
+        link = [[NSMutableArray alloc] init];
+    }
+    [link addObject:newLink];
+}
+
+- (void)addWaypoint:(Waypoint *)waypoint {
+    if (trekseg == nil) {
+        trekseg = [[NSMutableArray alloc] init];
+    }
+    [trekseg addObject:waypoint];
+}
+
+- (void) dealloc {
+    [name release];
+    [cmt release];
+    [desc release];
+    [src release];
+    [link release];
+    [type release];
+    [trekseg release];
+    [super dealloc];
+}
+@end
+
+#pragma mark GPX
+
+@implementation GPX
+@synthesize metadata;
+@synthesize waypoints;
+@synthesize routes;
+@synthesize treks;
+
+- (id) init {
+    self = [super init];
+    if(self) {
+        version = [[NSString alloc] initWithString:@"1.1"];
+        creator = [[NSString alloc] initWithString:@"gpx-api version 1.0"];
+    }
+    return(self);
+}
+
+- (void) addWaypoint:(Waypoint *)waypoint {
+    if (waypoints == nil) {
+        waypoints = [[NSMutableArray alloc] init];
+    }
+    [waypoints addObject:waypoint];
+}
+
+- (void) addRoute:(Route *)route {
+    if (routes == nil) {
+        routes = [[NSMutableArray alloc] init];
+    }
+    [routes addObject:route];
+}
+
+- (void) addTrek:(Trek *)trek {
+    if (treks == nil) {
+        treks = [[NSMutableArray alloc] init];
+    }
+    [treks addObject:trek];
+}
+
+- (void) dealloc {
+    [version release];
+    [creator release];
+    [metadata release];
+    [waypoints release];
+    [routes release];
+    [treks release];
+    [super dealloc];
+}
+@end
