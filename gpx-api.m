@@ -39,13 +39,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	return nil;
 }
 
-- (id) initWithHref: (NSURL*) inHref :(NSString*)inText :(NSString*)inType {
+- (id) initWithHref: (NSURL*) inHref {
     self = [super init];
     if(self) {
-        NSAssert(href != nil, @"inHref must be initialized before use");
+        NSAssert(href == nil, @"inHref must be initialized before use");
         href = [inHref retain];
-        text = [inText retain];
-        type = [inType retain];
     }
     return(self);
 }
@@ -136,6 +134,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 @end
 
+#pragma mark Bounds
+
+@implementation Bounds
+@synthesize minlat;
+@synthesize minlon;
+@synthesize maxlat;
+@synthesize maxlon;
+@end
+
 #pragma mark Metadata
 
 @implementation Metadata
@@ -212,12 +219,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	return nil;
 }
 
-- (id) initWithValues:(float)inLat :(float)inLon :(NSDecimal)inElev {
+- (id) initWithValues:(float)inLat :(float)inLon {
     self = [super init];
     if(self) {
 		lat = inLat;
         lon = inLon;
-		elev = inElev;
     }
     return(self);
 }

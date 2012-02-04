@@ -38,7 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @property (retain) NSString* text;
 @property (retain) NSString* type;
 
-- (id) initWithHref: (NSURL*) href :(NSString*)inText :(NSString*)inType;
+- (id) initWithHref: (NSURL*) href;
 @end
 
 #pragma mark Email
@@ -88,6 +88,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     float maxlat;
     float maxlon;
 }
+@property float minlat;
+@property float minlon;
+@property float maxlat;
+@property float maxlon;
 @end
 
 #pragma mark Metadata
@@ -118,7 +122,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @interface Waypoint : NSObject {
     float          lat;
     float          lon;
-    NSDecimal      elev;
+    float          elev;
     NSDate         *time;
     float          magvar;
     NSDecimal      geoidheight;
@@ -140,7 +144,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 @property float lat;
 @property float lon;
-@property NSDecimal elev;
+@property float elev;
 @property (retain) NSDate* time;
 @property NSDecimal geoidheight;
 @property (retain) NSString* name;
@@ -160,7 +164,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - (void)setFix:(NSString *)inFix;
 - (void)setDgpsid:(unsigned int)inDgpsid;
 
-- (id)initWithValues: (float)inLat :(float)inLon :(NSDecimal)elev;
+- (id)initWithValues: (float)inLat :(float)inLon;
 - (void)addLink: (Link*)newLink;
 @end
 
