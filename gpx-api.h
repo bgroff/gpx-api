@@ -194,6 +194,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - (void)addWaypoint:(Waypoint *)waypoint;
 @end
 
+#pragma mark TrekSegment
+
+@interface TrekSegment : NSObject {
+    NSMutableArray *trekpoints;
+    // Extensions
+}
+@property (retain) NSMutableArray* trekpoints;
+- (void)addWaypoint:(Waypoint *)waypoint;
+@end
+
 #pragma mark Trek
 
 @interface Trek : NSObject {
@@ -217,7 +227,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @property (retain) NSMutableArray* trekseg;
 
 - (void)addLink: (Link*)newLink;
-- (void)addWaypoint:(Waypoint *)waypoint;
+- (void)addTrekseg:(TrekSegment*)segment;
 @end
 
 #pragma mark GPX

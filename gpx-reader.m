@@ -1,3 +1,28 @@
+/*
+ Copyright (c) 2012, Bryce Groff
+ All rights reserved.
+ 
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met: 
+ 
+ 1. Redistributions of source code must retain the above copyright notice, this
+ list of conditions and the following disclaimer. 
+ 2. Redistributions in binary form must reproduce the above copyright notice,
+ this list of conditions and the following disclaimer in the documentation
+ and/or other materials provided with the distribution. 
+ 
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #import <stdio.h>
 #import <string.h>
 #import <libxml/xmlreader.h>
@@ -20,11 +45,11 @@ int main (int argc, const char * argv[])
             return -1;
         }
 
-        xmlDoc *doc = xmlReadFile(argv[1], NULL, 0);    
+        xmlDoc *doc = xmlReadFile(argv[1], NULL, 0);
         if (doc == NULL) {
             printf("error: could not parse file %s\n", argv[1]);
         }
-    
+
         xmlNode *root_element = xmlDocGetRootElement(doc);
         if (root_element == NULL){
             return -2;
@@ -32,17 +57,6 @@ int main (int argc, const char * argv[])
         GPX *gpx = [[GPX alloc] init];
         parse_gpx(root_element, gpx);
         xmlFreeDoc(doc);
-        
-        NSMutableArray *routes = gpx.routes;
-        for (NSUInteger i = 0; i < routes.count; i++) {
-            Route *route = [routes objectAtIndex:i];
-            printf("Route Name: %s\n", [route.name UTF8String]);
-            NSMutableArray *waypoints = route.rtept;
-            for (NSUInteger j = 0; j < waypoints.count; j++) {
-                Waypoint *waypoint = [waypoints objectAtIndex:j];
-                printf("\tWaypoint: lat: %f, lon: %f\n", waypoint.lat, waypoint.lon);
-            }
-        }
 
         [gpx release];
         return 0;
@@ -69,6 +83,7 @@ void parse_gpx(xmlNode *node, GPX *gpx)
             continue;
         }
         if (strcmp((const char*)cur_node->name, "trk") == 0) {
+            parse_tracks(cur_node, gpx);
             continue;
         }
 
@@ -204,7 +219,6 @@ void parse_routes(xmlNode *node, GPX *gpx)
     for (xmlNode *cur_node = node->children; cur_node; cur_node = cur_node->next) {
         if (strcasecmp((const char*)cur_node->name, "name") == 0) {
             NSString *name = parse_text_node(cur_node);
-            
             if (name) {
                 route.name = name;
                 [name release];
@@ -214,6 +228,7 @@ void parse_routes(xmlNode *node, GPX *gpx)
             Waypoint *waypoint = parse_waypoint(cur_node);
             if (waypoint != nil) {
                 [route addWaypoint:waypoint];
+                [waypoint release];
             }
         }
     }
@@ -223,7 +238,32 @@ void parse_routes(xmlNode *node, GPX *gpx)
 
 void parse_tracks(xmlNode *node, GPX *gpx)
 {
-    
+    Trek *trek = [[Trek alloc] init];
+    for (xmlNode *cur_node = node->children; cur_node; cur_node = cur_node->next) {
+        if (strcasecmp((const char*)cur_node->name, "name") == 0) {
+            NSString *name = parse_text_node(cur_node);
+            if (name) {
+                trek.name = name;
+                [name release];
+            }
+        }
+        if (strcasecmp((const char*)cur_node->name, "trkseg") == 0) {
+            TrekSegment *segment = [[TrekSegment alloc] init];
+            for (xmlNode *child = cur_node->children; child; child = child->next) {
+                if (strcmp((const char*)child->name, "trkpt") == 0) {
+                    Waypoint *waypoint = parse_waypoint(child);
+                    if (waypoint != nil) {
+                        [segment addWaypoint:waypoint];
+                        [waypoint release];
+                    }
+                }
+            }
+            [trek addTrekseg:segment];
+            [segment release];
+        }
+    }
+    [gpx addTrek:trek];
+    [trek release];
 }
 
 Waypoint* parse_waypoint(xmlNode *node)

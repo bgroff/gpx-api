@@ -286,6 +286,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 @end
 
+#pragma mark TrekSegment
+
+@implementation TrekSegment
+@synthesize trekpoints;
+
+- (void)addWaypoint:(Waypoint *)waypoint {
+    if (trekpoints == nil) {
+        trekpoints = [[NSMutableArray alloc] init];
+    }
+    [trekpoints addObject:waypoint];
+}
+- (void) dealloc {
+    [trekpoints release];
+    [super dealloc];
+}
+@end
+
 #pragma mark Trek
 
 @implementation Trek
@@ -305,11 +322,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [link addObject:newLink];
 }
 
-- (void)addWaypoint:(Waypoint *)waypoint {
+- (void)addTrekseg:(TrekSegment *)segment {
     if (trekseg == nil) {
         trekseg = [[NSMutableArray alloc] init];
     }
-    [trekseg addObject:waypoint];
+    [trekseg addObject:segment];
 }
 
 - (void) dealloc {
