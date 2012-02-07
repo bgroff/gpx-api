@@ -9,6 +9,8 @@ void parse_metadata(xmlNode*, GPX*);
 void parse_routes(xmlNode*, GPX*);
 void parse_tracks(xmlNode*, GPX*);
 Waypoint* parse_waypoint(xmlNode*);
+NSString* parse_text_node(xmlNode*);
+Link* parse_link(xmlNode*);
 
 int main (int argc, const char * argv[])
 {
@@ -49,12 +51,12 @@ void parse_gpx(xmlNode *node, GPX *gpx)
         }
         if (strcmp((const char*)cur_node->name, "wpt") == 0) {
             Waypoint *waypoint = parse_waypoint(cur_node);
-            printf("Name: %s, Lat: %f, Lon: %f, Elevation: %f\n", [waypoint.name UTF8String], waypoint.lat, waypoint.lon, waypoint.elev);
             if (waypoint != nil) {
                 [gpx addWaypoint:waypoint];
             }
         }
         if (strcmp((const char*)cur_node->name, "rte") == 0) {
+            parse_routes(cur_node, gpx);
             continue;
         }
         if (strcmp((const char*)cur_node->name, "trk") == 0) {
@@ -72,38 +74,27 @@ void parse_metadata(xmlNode *node, GPX *gpx)
     gpx.metadata = metadata;
     for (cur_node = node; cur_node; cur_node = cur_node->next) {
         if (strcasecmp((const char*)cur_node->name, "name") == 0) {
-            xmlNode *text = cur_node->children;
-            if (text && text->type == XML_TEXT_NODE) {
-                xmlChar *content = xmlNodeGetContent(text);
-                if (content != NULL) {
-                    metadata.name = [NSString stringWithUTF8String:(const char *)content];
-                }
-                xmlFree(content);
+            NSString *name = parse_text_node(cur_node);
+            if (name) {
+                metadata.name = name;
+                [name release];
             }
-            
         }
         if (strcasecmp((const char*)cur_node->name, "desc") == 0) {
-            xmlNode *text = cur_node->children;
-            if (text && text->type == XML_TEXT_NODE) {
-                xmlChar *content = xmlNodeGetContent(text);
-                if (content != NULL) {
-                    metadata.desc = [NSString stringWithUTF8String:(const char *)content];
-                }
-                xmlFree(content);
+            NSString *desc = parse_text_node(cur_node);
+            if (desc) {
+                metadata.desc = desc;
+                [desc release];
             }
-            
         }
         if (strcasecmp((const char*)cur_node->name, "author") == 0) {
             Person *author = [[Person alloc] init];
             for (xmlNode *child = cur_node->children; child; child = child->next) {
                 if (strcasecmp((const char*)child->name, "name") == 0) {
-                    xmlNode *text = child->children;
-                    if (text && text->type == XML_TEXT_NODE) {
-                        xmlChar *content = xmlNodeGetContent(text);
-                        if (content != NULL) {
-                            author.name = [NSString stringWithUTF8String:(const char *)content];
-                        }
-                        xmlFree(content);
+                    NSString *name = parse_text_node(child);
+                    if (name) {
+                        author.name = name;
+                        [name release];
                     }
                 }
                 if (strcasecmp((const char*)child->name, "email") == 0) {
@@ -114,38 +105,12 @@ void parse_metadata(xmlNode *node, GPX *gpx)
                         author.email = email;
                         [email release];
                     }
-                    xmlFree(user); xmlFree(domain);
+                    if (user) {xmlFree(user);} if(domain) {xmlFree(domain);}
                 }
                 if (strcasecmp((const char*)child->name, "link") == 0) {
-                    xmlChar *href = xmlGetProp(child, (xmlChar*)"href");
-                    Link *link = [[Link alloc] initWithHref:[NSURL URLWithString:[NSString stringWithUTF8String:(const char*)href]]];
+                    Link *link = parse_link(child);
                     author.link = link;
                     [link release];
-                    xmlFree(href);
-                    if (href != NULL) {
-                        for (xmlNode *inner = child->children; inner; inner = inner->next) {
-                            if (strcasecmp((const char*)inner->name, "text") == 0 && inner->type == XML_ELEMENT_NODE) {
-                                xmlNode *text_node = inner->children;
-                                if (text_node && text_node->type == XML_TEXT_NODE) {
-                                    xmlChar *text = xmlNodeGetContent(text_node);
-                                    if (text != NULL) {
-                                        link.text = [NSString stringWithUTF8String:(const char *)text];
-                                        xmlFree(text);
-                                    }
-                                }
-                            }
-                            if (strcasecmp((const char*)inner->name, "type") == 0) {
-                                xmlNode *text_node = inner->children;
-                                if (text_node && text_node->type == XML_TEXT_NODE) {
-                                    xmlChar *type = xmlNodeGetContent(text_node);
-                                    if (type != NULL) {
-                                        link.text = [NSString stringWithUTF8String:(const char *)type];
-                                        xmlFree(type);
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
             metadata.author = author;
@@ -158,13 +123,10 @@ void parse_metadata(xmlNode *node, GPX *gpx)
             xmlFree(author);
             for (xmlNode *child = cur_node->children; child; child = child->next) {
                 if (strcasecmp((const char*)child->name, "year") == 0) {
-                    xmlNode *text = child->children;
-                    if (text && text->type == XML_TEXT_NODE) {
-                        xmlChar *content = xmlNodeGetContent(text);
-                        if (content != NULL) {
-                            copyright.year = [NSString stringWithUTF8String:(const char *)content];
-                        }
-                        xmlFree(content);
+                    NSString *year = parse_text_node(child);
+                    if (year) {
+                        copyright.year = year;
+                        [year release];
                     }
                 }
                 if (strcasecmp((const char*)child->name, "license") == 0) {
@@ -181,23 +143,11 @@ void parse_metadata(xmlNode *node, GPX *gpx)
             [copyright release];
         }
         if (strcasecmp((const char*)cur_node->name, "link") == 0) {
-            xmlChar *href = xmlGetProp(cur_node, (xmlChar*)"href");
-            Link *link = [[Link alloc] initWithHref:[NSURL URLWithString:[NSString stringWithUTF8String:(const char *)href]]];
-            [metadata addLink:link];
-            xmlFree(href);
-            for (xmlNode *child = cur_node->children; child; child = child->next) {
-                if (strcasecmp((const char*)child->name, "text") == 0) {
-                    xmlNode *text = child->children;
-                    if (text && text->type == XML_TEXT_NODE) {
-                        xmlChar *content = xmlNodeGetContent(text);
-                        if (content != NULL) {
-                            link.text = [NSString stringWithUTF8String:(const char *)content];
-                        }
-                        xmlFree(content);
-                    }
-                }
+            Link *link = parse_link(cur_node);
+            if (link) {
+                [metadata addLink:link];
+                [link release];
             }
-            [link release];
         }
         if (strcasecmp((const char*)cur_node->name, "time") == 0) {
             xmlNode *text = cur_node->children;
@@ -214,13 +164,10 @@ void parse_metadata(xmlNode *node, GPX *gpx)
             }
         }
         if (strcasecmp((const char*)cur_node->name, "keywords") == 0) {
-            xmlNode *text = cur_node->children;
-            if (text && text->type == XML_TEXT_NODE) {
-                xmlChar *content = xmlNodeGetContent(text);
-                if (content != NULL) {
-                    metadata.keywords = [NSString stringWithUTF8String:(const char *)content];
-                }
-                xmlFree(content);
+            NSString *keywords = parse_text_node(cur_node);
+            if (keywords) {
+                metadata.keywords = keywords;
+                [keywords release];
             }
         }
         if (strcasecmp((const char*)cur_node->name, "bounds") == 0) {
@@ -244,7 +191,12 @@ void parse_metadata(xmlNode *node, GPX *gpx)
 
 void parse_routes(xmlNode *node, GPX *gpx)
 {
-
+    Route *route = [[Route alloc] init];
+    for (xmlNode *cur_node = node; cur_node; cur_node = cur_node->next) {
+        
+    }
+    [gpx addRoute:route];
+    [route release];
 }
 
 void parse_tracks(xmlNode *node, GPX *gpx)
@@ -263,23 +215,18 @@ Waypoint* parse_waypoint(xmlNode *node)
         xmlFree(latstr); xmlFree(lonstr);
         for (xmlNode *child = node->children; child; child = child->next) {
             if (strcasecmp((const char*)child->name, "ele") == 0) {
-                xmlNode *text = child->children;
-                if (text && text->type == XML_TEXT_NODE) {
-                    xmlChar *content = xmlNodeGetContent(text);
-                    if (content != NULL) {
-                        waypoint.elev = [[NSString stringWithUTF8String:(const char *)content] doubleValue];
-                    }
-                    xmlFree(content);
+                NSString *elev = parse_text_node(child);
+                if (elev) {
+                    float el = [elev doubleValue];
+                    waypoint.elev = el;
+                    [elev release];
                 }
             }
             if (strcasecmp((const char*)child->name, "name") == 0) {
-                xmlNode *text = child->children;
-                if (text && text->type == XML_TEXT_NODE) {
-                    xmlChar *content = xmlNodeGetContent(text);
-                    if (content != NULL) {
-                        waypoint.name = [NSString stringWithUTF8String:(const char *)content];
-                    }
-                    xmlFree(content);
+                NSString *name = parse_text_node(child);
+                if (name) {
+                    waypoint.name = name;
+                    [name release];
                 }
             }
         }
@@ -287,3 +234,46 @@ Waypoint* parse_waypoint(xmlNode *node)
     }
     return nil;
 }
+
+NSString* parse_text_node(xmlNode *child)
+{
+    xmlNode *text = child->children;
+    if (text && text->type == XML_TEXT_NODE) {
+        xmlChar *content = xmlNodeGetContent(text);
+        if (content != NULL) {
+            return [NSString stringWithUTF8String:(const char *)content];
+        }
+        xmlFree(content);
+    }
+    return nil;
+}
+
+Link* parse_link(xmlNode *child)
+{
+    xmlChar *href = xmlGetProp(child, (xmlChar*)"href");
+    if (href == NULL) {
+        return nil;
+    }
+    Link *link = [[Link alloc] initWithHref:[NSURL URLWithString:[NSString stringWithUTF8String:(const char*)href]]];
+    xmlFree(href);
+    if (href != NULL) {
+        for (xmlNode *inner = child->children; inner; inner = inner->next) {
+            if (strcasecmp((const char*)inner->name, "text") == 0 && inner->type == XML_ELEMENT_NODE) {
+                NSString *text = parse_text_node(inner);
+                if (text) {
+                    link.text = text;
+                    [text release];
+                }
+            }
+            if (strcasecmp((const char*)inner->name, "type") == 0) {
+                NSString *type = parse_text_node(inner);
+                if (type) {
+                    link.type = type;
+                    [type release];
+                }
+            }
+        }
+    }
+    return link;
+}
+
