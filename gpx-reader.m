@@ -10,33 +10,31 @@ void parse_routes(xmlNode*, GPX*);
 void parse_tracks(xmlNode*, GPX*);
 Waypoint* parse_waypoint(xmlNode*);
 NSString* parse_text_node(xmlNode*);
+NSURL* parse_url(xmlNode*);
 Link* parse_link(xmlNode*);
 
 int main (int argc, const char * argv[])
 {
     @autoreleasepool {
-        
-    GPX *gpx = [[GPX alloc] init];
-    xmlDoc *doc = NULL;
-    xmlNode *root_element = NULL;
+        if (argc < 2) {
+            return -1;
+        }
+
+        xmlDoc *doc = xmlReadFile(argv[1], NULL, 0);    
+        if (doc == NULL) {
+            printf("error: could not parse file %s\n", argv[1]);
+        }
     
-    if (argc < 2) {
+        xmlNode *root_element = xmlDocGetRootElement(doc);
+        if (root_element == NULL){
+            return -2;
+        }
+        GPX *gpx = [[GPX alloc] init];
+        parse_gpx(root_element, gpx);
+        xmlFreeDoc(doc);
+    
         [gpx release];
-        return -1;
-    }
-    
-    doc = xmlReadFile(argv[1], NULL, 0);
-    
-    if (doc == NULL) {
-        printf("error: could not parse file %s\n", argv[1]);
-    }
-    
-    root_element = xmlDocGetRootElement(doc);    
-    parse_gpx(root_element, gpx);
-    xmlFreeDoc(doc);
-    
-    [gpx release];
-    return 0;
+        return 0;
     }
 }
 
@@ -118,6 +116,9 @@ void parse_metadata(xmlNode *node, GPX *gpx)
         }
         if (strcasecmp((const char*)cur_node->name, "copyright") == 0) {
             xmlChar *author = xmlGetProp(cur_node, (xmlChar*)"author");
+            if (author == NULL) {
+                continue;
+            }
             Copyright *copyright = [[Copyright alloc] initWithValues:[NSString stringWithUTF8String:(const char *)author] :nil :nil];
             metadata.copyright = copyright;
             xmlFree(author);
@@ -130,13 +131,10 @@ void parse_metadata(xmlNode *node, GPX *gpx)
                     }
                 }
                 if (strcasecmp((const char*)child->name, "license") == 0) {
-                    xmlNode *text = child->children;
-                    if (text && text->type == XML_TEXT_NODE) {
-                        xmlChar *content = xmlNodeGetContent(text);
-                        if (content != NULL) {
-                            copyright.license = [NSURL URLWithString:[NSString stringWithUTF8String:(const char *)content]];
-                        }
-                        xmlFree(content);
+                    NSURL *url = parse_url(child);
+                    if (url) {
+                        copyright.license = url;
+                        [url release];
                     }
                 }
             }
@@ -193,7 +191,19 @@ void parse_routes(xmlNode *node, GPX *gpx)
 {
     Route *route = [[Route alloc] init];
     for (xmlNode *cur_node = node; cur_node; cur_node = cur_node->next) {
-        
+        if (strcasecmp((const char*)cur_node->name, "name") == 0) {
+            NSString *name = parse_text_node(cur_node);
+            if (name) {
+                route.name = name;
+                [name release];
+            }
+        }
+        if (strcmp((const char*)cur_node->name, "rtept") == 0) {
+            Waypoint *waypoint = parse_waypoint(cur_node);
+            if (waypoint != nil) {
+                [route addWaypoint:waypoint];
+            }
+        }
     }
     [gpx addRoute:route];
     [route release];
@@ -241,36 +251,43 @@ NSString* parse_text_node(xmlNode *child)
     if (text && text->type == XML_TEXT_NODE) {
         xmlChar *content = xmlNodeGetContent(text);
         if (content != NULL) {
-            return [NSString stringWithUTF8String:(const char *)content];
+            return [[NSString alloc] initWithUTF8String:(const char *)content];
         }
         xmlFree(content);
     }
     return nil;
 }
 
-Link* parse_link(xmlNode *child)
+NSURL* parse_url(xmlNode *node)
 {
-    xmlChar *href = xmlGetProp(child, (xmlChar*)"href");
+    xmlChar *href = xmlGetProp(node, (xmlChar*)"href");
     if (href == NULL) {
         return nil;
     }
-    Link *link = [[Link alloc] initWithHref:[NSURL URLWithString:[NSString stringWithUTF8String:(const char*)href]]];
+    NSString *url_string = [[NSString alloc] initWithUTF8String:(const char*)href];
+    NSURL *url = [[NSURL alloc] initWithString:url_string];
+    [url_string release];
     xmlFree(href);
-    if (href != NULL) {
-        for (xmlNode *inner = child->children; inner; inner = inner->next) {
-            if (strcasecmp((const char*)inner->name, "text") == 0 && inner->type == XML_ELEMENT_NODE) {
-                NSString *text = parse_text_node(inner);
-                if (text) {
-                    link.text = text;
-                    [text release];
-                }
+    return url;
+}
+
+Link* parse_link(xmlNode *child)
+{
+    NSURL *url = parse_url(child);
+    Link *link = [[Link alloc] initWithHref:url];
+    for (xmlNode *inner = child->children; inner; inner = inner->next) {
+        if (strcasecmp((const char*)inner->name, "text") == 0 && inner->type == XML_ELEMENT_NODE) {
+            NSString *text = parse_text_node(inner);
+            if (text) {
+                link.text = text;
+                [text release];
             }
-            if (strcasecmp((const char*)inner->name, "type") == 0) {
-                NSString *type = parse_text_node(inner);
-                if (type) {
-                    link.type = type;
-                    [type release];
-                }
+        }
+        if (strcasecmp((const char*)inner->name, "type") == 0) {
+            NSString *type = parse_text_node(inner);
+            if (type) {
+                link.type = type;
+                [type release];
             }
         }
     }
