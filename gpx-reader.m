@@ -32,7 +32,18 @@ int main (int argc, const char * argv[])
         GPX *gpx = [[GPX alloc] init];
         parse_gpx(root_element, gpx);
         xmlFreeDoc(doc);
-    
+        
+        NSMutableArray *routes = gpx.routes;
+        for (NSUInteger i = 0; i < routes.count; i++) {
+            Route *route = [routes objectAtIndex:i];
+            printf("Route Name: %s\n", [route.name UTF8String]);
+            NSMutableArray *waypoints = route.rtept;
+            for (NSUInteger j = 0; j < waypoints.count; j++) {
+                Waypoint *waypoint = [waypoints objectAtIndex:j];
+                printf("\tWaypoint: lat: %f, lon: %f\n", waypoint.lat, waypoint.lon);
+            }
+        }
+
         [gpx release];
         return 0;
     }
@@ -190,9 +201,10 @@ void parse_metadata(xmlNode *node, GPX *gpx)
 void parse_routes(xmlNode *node, GPX *gpx)
 {
     Route *route = [[Route alloc] init];
-    for (xmlNode *cur_node = node; cur_node; cur_node = cur_node->next) {
+    for (xmlNode *cur_node = node->children; cur_node; cur_node = cur_node->next) {
         if (strcasecmp((const char*)cur_node->name, "name") == 0) {
             NSString *name = parse_text_node(cur_node);
+            
             if (name) {
                 route.name = name;
                 [name release];
