@@ -28,41 +28,18 @@
 #import <libxml/xmlreader.h>
 
 #import "gpx-api.h"
+#import "gpx-reader.h"
 
-void parse_gpx(xmlNode*, GPX*);
 void parse_metadata(xmlNode*, GPX*);
 void parse_routes(xmlNode*, GPX*);
 void parse_tracks(xmlNode*, GPX*);
-Waypoint* parse_waypoint(xmlNode*);
+void parse_path_header(xmlNode*, PathHeader*, NSString*);
+Waypoint* parse_waypoint(xmlNode*, NSString*);
 NSString* parse_text_node(xmlNode*);
 NSURL* parse_url(xmlNode*);
 Link* parse_link(xmlNode*);
-
-int main (int argc, const char * argv[])
-{
-    @autoreleasepool {
-        if (argc < 2) {
-            return -1;
-        }
-
-        xmlDoc *doc = xmlReadFile(argv[1], NULL, 0);
-        if (doc == NULL) {
-            printf("error: could not parse file %s\n", argv[1]);
-        }
-
-        xmlNode *root_element = xmlDocGetRootElement(doc);
-        if (root_element == NULL){
-            return -2;
-        }
-        GPX *gpx = [[GPX alloc] init];
-        parse_gpx(root_element, gpx);
-        xmlFreeDoc(doc);
-
-        [gpx release];
-        return 0;
-    }
-}
-
+NSDate* parse_date(xmlNode*);
+void print_error_message_for_element(NSString*);
 
 void parse_gpx(xmlNode *node, GPX *gpx)
 {
@@ -73,7 +50,7 @@ void parse_gpx(xmlNode *node, GPX *gpx)
             continue;
         }
         if (strcmp((const char*)cur_node->name, "wpt") == 0) {
-            Waypoint *waypoint = parse_waypoint(cur_node);
+            Waypoint *waypoint = parse_waypoint(cur_node, @"");
             if (waypoint != nil) {
                 [gpx addWaypoint:waypoint];
             }
@@ -102,6 +79,8 @@ void parse_metadata(xmlNode *node, GPX *gpx)
             if (name) {
                 metadata.name = name;
                 [name release];
+            } else {
+                print_error_message_for_element(@"metadata: name");
             }
         }
         if (strcasecmp((const char*)cur_node->name, "desc") == 0) {
@@ -109,6 +88,8 @@ void parse_metadata(xmlNode *node, GPX *gpx)
             if (desc) {
                 metadata.desc = desc;
                 [desc release];
+            } else {
+                print_error_message_for_element(@"metadata: desc");
             }
         }
         if (strcasecmp((const char*)cur_node->name, "author") == 0) {
@@ -119,6 +100,8 @@ void parse_metadata(xmlNode *node, GPX *gpx)
                     if (name) {
                         author.name = name;
                         [name release];
+                    } else {
+                        print_error_message_for_element(@"metadata: author: name");
                     }
                 }
                 if (strcasecmp((const char*)child->name, "email") == 0) {
@@ -128,6 +111,8 @@ void parse_metadata(xmlNode *node, GPX *gpx)
                         Email *email = [[Email alloc] initWithUserAndDomain: [NSString stringWithUTF8String:(const char *)user] :[ NSString stringWithUTF8String:(const char *)domain]];
                         author.email = email;
                         [email release];
+                    } else {
+                        print_error_message_for_element(@"metadata: author: email");
                     }
                     if (user) {xmlFree(user);} if(domain) {xmlFree(domain);}
                 }
@@ -135,6 +120,8 @@ void parse_metadata(xmlNode *node, GPX *gpx)
                     Link *link = parse_link(child);
                     author.link = link;
                     [link release];
+                } else {
+                    print_error_message_for_element(@"metadata: author: name");
                 }
             }
             metadata.author = author;
@@ -143,6 +130,7 @@ void parse_metadata(xmlNode *node, GPX *gpx)
         if (strcasecmp((const char*)cur_node->name, "copyright") == 0) {
             xmlChar *author = xmlGetProp(cur_node, (xmlChar*)"author");
             if (author == NULL) {
+                print_error_message_for_element(@"metadata: copyright: author");
                 continue;
             }
             Copyright *copyright = [[Copyright alloc] initWithValues:[NSString stringWithUTF8String:(const char *)author] :nil :nil];
@@ -154,6 +142,8 @@ void parse_metadata(xmlNode *node, GPX *gpx)
                     if (year) {
                         copyright.year = year;
                         [year release];
+                    } else {
+                        print_error_message_for_element(@"metadata: copyright: year");
                     }
                 }
                 if (strcasecmp((const char*)child->name, "license") == 0) {
@@ -161,6 +151,8 @@ void parse_metadata(xmlNode *node, GPX *gpx)
                     if (url) {
                         copyright.license = url;
                         [url release];
+                    } else {
+                        print_error_message_for_element(@"metadata: copyright: license");
                     }
                 }
             }
@@ -171,20 +163,17 @@ void parse_metadata(xmlNode *node, GPX *gpx)
             if (link) {
                 [metadata addLink:link];
                 [link release];
+            } else {
+                print_error_message_for_element(@"metadata: link");
             }
         }
         if (strcasecmp((const char*)cur_node->name, "time") == 0) {
-            xmlNode *text = cur_node->children;
-            if (text && text->type == XML_TEXT_NODE) {
-                xmlChar *content = xmlNodeGetContent(text);
-                if (content != NULL) {
-                    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
-                    [dateFormat setTimeStyle:NSDateFormatterFullStyle];
-                    [dateFormat setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss'Z'"];
-                    metadata.time = [dateFormat dateFromString:[NSString stringWithUTF8String:(const char *)content]];
-                    [dateFormat release];
-                }
-                xmlFree(content);
+            NSDate *date = parse_date(cur_node);
+            if (date) {
+                metadata.time = date;
+                [date release];
+            } else {
+                print_error_message_for_element(@"metadata: time");
             }
         }
         if (strcasecmp((const char*)cur_node->name, "keywords") == 0) {
@@ -192,6 +181,8 @@ void parse_metadata(xmlNode *node, GPX *gpx)
             if (keywords) {
                 metadata.keywords = keywords;
                 [keywords release];
+            } else {
+                print_error_message_for_element(@"metadata: keywords");
             }
         }
         if (strcasecmp((const char*)cur_node->name, "bounds") == 0) {
@@ -205,6 +196,8 @@ void parse_metadata(xmlNode *node, GPX *gpx)
                 metadata.bounds.minlon = [[NSString stringWithUTF8String:(const char *)minlon] doubleValue];
                 metadata.bounds.maxlat = [[NSString stringWithUTF8String:(const char *)maxlat] doubleValue];
                 metadata.bounds.maxlon = [[NSString stringWithUTF8String:(const char *)maxlon] doubleValue];
+            } else {
+                print_error_message_for_element(@"metadata: bounds");
             }
             if (minlat) xmlFree(minlat); if (minlon) xmlFree(minlon);
             if (maxlat) xmlFree(maxlat); if (maxlon) xmlFree(maxlon);
@@ -217,19 +210,16 @@ void parse_routes(xmlNode *node, GPX *gpx)
 {
     Route *route = [[Route alloc] init];
     for (xmlNode *cur_node = node->children; cur_node; cur_node = cur_node->next) {
-        if (strcasecmp((const char*)cur_node->name, "name") == 0) {
-            NSString *name = parse_text_node(cur_node);
-            if (name) {
-                route.name = name;
-                [name release];
-            }
-        }
         if (strcmp((const char*)cur_node->name, "rtept") == 0) {
-            Waypoint *waypoint = parse_waypoint(cur_node);
+            Waypoint *waypoint = parse_waypoint(cur_node, @"rte: rtept: ");
             if (waypoint != nil) {
                 [route addWaypoint:waypoint];
                 [waypoint release];
+            } else {
+                print_error_message_for_element(@"rte: rtept");
             }
+        } else {
+            parse_path_header(cur_node, route, @"rte: ");
         }
     }
     [gpx addRoute:route];
@@ -240,18 +230,11 @@ void parse_tracks(xmlNode *node, GPX *gpx)
 {
     Trek *trek = [[Trek alloc] init];
     for (xmlNode *cur_node = node->children; cur_node; cur_node = cur_node->next) {
-        if (strcasecmp((const char*)cur_node->name, "name") == 0) {
-            NSString *name = parse_text_node(cur_node);
-            if (name) {
-                trek.name = name;
-                [name release];
-            }
-        }
         if (strcasecmp((const char*)cur_node->name, "trkseg") == 0) {
             TrekSegment *segment = [[TrekSegment alloc] init];
             for (xmlNode *child = cur_node->children; child; child = child->next) {
                 if (strcmp((const char*)child->name, "trkpt") == 0) {
-                    Waypoint *waypoint = parse_waypoint(child);
+                    Waypoint *waypoint = parse_waypoint(child, @"trk: trkseg: ");
                     if (waypoint != nil) {
                         [segment addWaypoint:waypoint];
                         [waypoint release];
@@ -260,13 +243,88 @@ void parse_tracks(xmlNode *node, GPX *gpx)
             }
             [trek addTrekseg:segment];
             [segment release];
+        } else {
+            parse_path_header(cur_node, trek, @"trk: ");
         }
     }
     [gpx addTrek:trek];
     [trek release];
 }
 
-Waypoint* parse_waypoint(xmlNode *node)
+void parse_path_header(xmlNode *node, PathHeader *data, NSString *error)
+{
+    if (strcasecmp((const char*)node->name, "name") == 0) {
+        NSString *name = parse_text_node(node);
+        if (name) {
+            data.name = name;
+            [name release];
+        } else {
+            print_error_message_for_element([error stringByAppendingString:@"name"]);
+        }
+    }
+    if (strcasecmp((const char*)node->name, "cmt") == 0) {
+        NSString *cmt = parse_text_node(node);
+        if (cmt) {
+            data.cmt = cmt;
+            [cmt release];
+        } else {
+            print_error_message_for_element([error stringByAppendingString:@"cmt"]);
+        }
+    }
+    if (strcasecmp((const char*)node->name, "desc") == 0) {
+        NSString *desc = parse_text_node(node);
+        if (desc) {
+            data.desc = desc;
+            [desc release];
+        } else {
+            print_error_message_for_element([error stringByAppendingString:@"desc"]);
+        }
+    }
+    if (strcasecmp((const char*)node->name, "src") == 0) {
+        NSString *src = parse_text_node(node);
+        if (src) {
+            data.src = src;
+            [src release];
+        } else {
+            print_error_message_for_element([error stringByAppendingString:@"src"]);
+        }
+    }
+    if (strcasecmp((const char*)node->name, "link") == 0) {
+        Link *link = parse_link(node);
+        if (link) {
+            [data addLink:link];
+            [link release];
+        } else {
+            print_error_message_for_element([error stringByAppendingString:@"link"]);
+        }
+
+    }
+    if (strcasecmp((const char*)node->name, "number") == 0) {
+        NSString *number = parse_text_node(node);
+        if (number) {
+            data.number = [number doubleValue];
+            [number release];
+        } else {
+            print_error_message_for_element([error stringByAppendingString:@"number"]);
+        }
+    }
+    if (strcasecmp((const char*)node->name, "type") == 0) {
+        NSString *type = parse_text_node(node);
+        if (type) {
+            data.type = type;
+            [type release];
+        } else {
+            print_error_message_for_element([error stringByAppendingString:@"type"]);
+        }
+    }
+    if (strcasecmp((const char*)node->name, "extension") == 0) {
+        // do extension stuff later
+    } else {
+        print_error_message_for_element([error stringByAppendingString:@"extension"]);
+    }
+}
+
+Waypoint* parse_waypoint(xmlNode *node, NSString *error)
 {
     xmlChar *latstr = xmlGetProp(node, (xmlChar*)"lat");
     xmlChar *lonstr = xmlGetProp(node, (xmlChar*)"lon");
@@ -282,14 +340,107 @@ Waypoint* parse_waypoint(xmlNode *node)
                     float el = [elev doubleValue];
                     waypoint.elev = el;
                     [elev release];
+                } else {
+                    print_error_message_for_element([error stringByAppendingString:@"elevation"]);
                 }
             }
-            if (strcasecmp((const char*)child->name, "name") == 0) {
-                NSString *name = parse_text_node(child);
-                if (name) {
-                    waypoint.name = name;
-                    [name release];
+            else if (strcasecmp((const char*)child->name, "time") == 0) {
+                NSDate *time = parse_date(child);
+                if (time) {
+                    waypoint.time = time;
+                    [time release];
+                } else {
+                    print_error_message_for_element([error stringByAppendingString:@"time"]);
                 }
+            }
+            else if (strcasecmp((const char*)child->name, "magvar") == 0) {
+                NSString *magvar = parse_text_node(child);
+                if ([waypoint setMagvar:[magvar doubleValue]]) {
+                } else {
+                    print_error_message_for_element([error stringByAppendingString:@"magvar"]);
+                }
+            }
+            else if (strcasecmp((const char*)child->name, "geoidheight") == 0) {
+                NSString *geoidheight = parse_text_node(child);
+                if (geoidheight) {
+                    waypoint.geoidheight = [geoidheight doubleValue];
+                } else {
+                    print_error_message_for_element([error stringByAppendingString:@"geoidheight"]);
+                }
+            }
+            else if (strcasecmp((const char*)child->name, "sym") == 0) {
+                NSString *sym = parse_text_node(child);
+                if (sym) {
+                    waypoint.sym = sym;
+                    [sym release];
+                } else {
+                    print_error_message_for_element([error stringByAppendingString:@"sym"]);
+                }
+            }
+            else if (strcasecmp((const char*)child->name, "fix") == 0) {
+                NSString *fix = parse_text_node(child);
+                if ([waypoint setFix:fix]) {
+                    [fix release];
+                } else {
+                    print_error_message_for_element([error stringByAppendingString:@"fix"]);
+                }
+            }
+            else if (strcasecmp((const char*)child->name, "sat") == 0) {
+                NSString *sat = parse_text_node(child);
+                if (sat) {
+                    waypoint.sat = [sat intValue];
+                    [sat release];
+                } else {
+                    print_error_message_for_element([error stringByAppendingString:@"sat"]);
+                }
+            }
+            else if (strcasecmp((const char*)child->name, "hdop") == 0) {
+                NSString *hdop = parse_text_node(child);
+                if (hdop) {
+                    waypoint.sat = [hdop doubleValue];
+                    [hdop release];
+                } else {
+                    print_error_message_for_element([error stringByAppendingString:@"hdop"]);
+                }
+            }
+            else if (strcasecmp((const char*)child->name, "vdop") == 0) {
+                NSString *vdop = parse_text_node(child);
+                if (vdop) {
+                    waypoint.sat = [vdop doubleValue];
+                    [vdop release];
+                } else {
+                    print_error_message_for_element([error stringByAppendingString:@"vdop"]);
+                }
+            }
+            else if (strcasecmp((const char*)child->name, "pdop") == 0) {
+                NSString *pdop = parse_text_node(child);
+                if (pdop) {
+                    waypoint.sat = [pdop doubleValue];
+                    [pdop release];
+                } else {
+                    print_error_message_for_element([error stringByAppendingString:@"pdop"]);
+                }
+            }
+            else if (strcasecmp((const char*)child->name, "ageofdgpsdata") == 0) {
+                NSString *ageofdgpsdata = parse_text_node(child);
+                if (ageofdgpsdata) {
+                    waypoint.ageofdgpsdata = [ageofdgpsdata doubleValue];
+                    [ageofdgpsdata release];
+                } else {
+                    print_error_message_for_element([error stringByAppendingString:@"ageofdgpsdata"]);
+                }
+            }
+            else if (strcasecmp((const char*)child->name, "dgpsid") == 0) {
+                NSString *dgpsid = parse_text_node(child);
+                if (dgpsid) {
+                    waypoint.dgpsid = (unsigned int)[dgpsid intValue];
+                    [dgpsid release];
+                } else {
+                    print_error_message_for_element([error stringByAppendingString:@"dgpsid"]);
+                }
+            }
+            else {
+                parse_path_header(child, waypoint, [error stringByAppendingString:@"waypoint: "]);
             }
         }
         return waypoint;
@@ -323,20 +474,20 @@ NSURL* parse_url(xmlNode *node)
     return url;
 }
 
-Link* parse_link(xmlNode *child)
+Link* parse_link(xmlNode *node)
 {
-    NSURL *url = parse_url(child);
+    NSURL *url = parse_url(node);
     Link *link = [[Link alloc] initWithHref:url];
-    for (xmlNode *inner = child->children; inner; inner = inner->next) {
-        if (strcasecmp((const char*)inner->name, "text") == 0 && inner->type == XML_ELEMENT_NODE) {
-            NSString *text = parse_text_node(inner);
+    for (xmlNode *child = node->children; child; child = child->next) {
+        if (strcasecmp((const char*)child->name, "text") == 0 && child->type == XML_ELEMENT_NODE) {
+            NSString *text = parse_text_node(child);
             if (text) {
                 link.text = text;
                 [text release];
             }
         }
-        if (strcasecmp((const char*)inner->name, "type") == 0) {
-            NSString *type = parse_text_node(inner);
+        if (strcasecmp((const char*)child->name, "type") == 0) {
+            NSString *type = parse_text_node(child);
             if (type) {
                 link.type = type;
                 [type release];
@@ -346,3 +497,25 @@ Link* parse_link(xmlNode *child)
     return link;
 }
 
+NSDate* parse_date(xmlNode *node)
+{
+    xmlNode *text = node->children;
+    if (text && text->type == XML_TEXT_NODE) {
+        xmlChar *content = xmlNodeGetContent(text);
+        if (content != NULL) {
+            NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+            [dateFormat setTimeStyle:NSDateFormatterFullStyle];
+            [dateFormat setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss'Z'"];
+            NSDate *date = [dateFormat dateFromString:[NSString stringWithUTF8String:(const char *)content]];
+            [dateFormat release];
+            return date;
+        }
+        xmlFree(content);
+    }
+    return nil;
+}
+
+void print_error_message_for_element(NSString *error)
+{
+    NSLog(@"The element: %@, could not be parsed.\n", error);
+}

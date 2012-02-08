@@ -39,6 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @property (retain) NSString* type;
 
 - (id) initWithHref: (NSURL*) href;
+- (void) dumpLink;
 @end
 
 #pragma mark Email
@@ -52,6 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @property (retain) NSString* domain;
 
 - (id) initWithUserAndDomain: (NSString*)inUser :(NSString*)inDomain;
+- (void) dumpEmail;
 @end
 
 #pragma mark Person
@@ -64,6 +66,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @property (retain) NSString* name;
 @property (retain) Email* email;
 @property (retain) Link* link;
+
+- (void) dumpAuthor;
 @end
 
 #pragma mark Copyright
@@ -78,6 +82,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @property (retain) NSURL* license;
 
 - (id) initWithValues: (NSString*)inAuthor :(NSString*)inYear :(NSURL*)inLicense;
+- (void) dumpCopyright;
 @end
 
 #pragma mark Bounds
@@ -117,60 +122,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @property (retain) Bounds* bounds;
 
 - (void)addLink: (Link*)newLink;
+- (void)dumpMetadata;
 @end
 
-@interface Waypoint : NSObject {
-    float          lat;
-    float          lon;
-    float          elev;
-    NSDate         *time;
-    float          magvar;
-    NSDecimal      geoidheight;
-    NSString       *name;
-    NSString       *cmt;
-    NSString       *desc;
-    NSString       *src;
-    NSMutableArray *link;
-    NSString       *sym;
-    NSString       *type;
-    NSString       *fix; // Must be one of: {'none'|'2d'|'3d'|'dgps'|'pps'}
-    unsigned int   sat;
-    NSDecimal      hdop;
-    NSDecimal      vdop;
-    NSDecimal      pdop;
-    NSDecimal      ageofdgpsdata;
-    unsigned int   dgpsid;
-    // extensions;
-}
-@property float lat;
-@property float lon;
-@property float elev;
-@property (retain) NSDate* time;
-@property NSDecimal geoidheight;
-@property (retain) NSString* name;
-@property (retain) NSString* cmt;
-@property (retain) NSString* desc;
-@property (retain) NSString* src;
-@property (retain) NSMutableArray* link;
-@property (retain) NSString* sym;
-@property (retain) NSString* type;
-@property unsigned int sat;
-@property NSDecimal hdop;
-@property NSDecimal vdop;
-@property NSDecimal pdop;
-@property NSDecimal ageofdgpsdata;
+#pragma mark PathHeader
 
-- (void)setMagvar:(float)inMagvar;
-- (void)setFix:(NSString *)inFix;
-- (void)setDgpsid:(unsigned int)inDgpsid;
-
-- (id)initWithValues: (float)inLat :(float)inLon;
-- (void)addLink: (Link*)newLink;
-@end
-
-#pragma mark Route
-
-@interface Route : NSObject {
+@interface PathHeader : NSObject {
     NSString       *name;
     NSString       *cmt;
     NSString       *desc;
@@ -178,8 +135,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     NSMutableArray *link;
     unsigned int   number;
     NSString       *type;
-    // extensions
-    NSMutableArray *rtept;
+    // extension
 }
 @property (retain) NSString* name;
 @property (retain) NSString* cmt;
@@ -188,10 +144,60 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @property (retain) NSMutableArray* link;
 @property unsigned int number;
 @property (retain) NSString* type;
-@property (retain) NSMutableArray* rtept;
 
 - (void)addLink: (Link*)newLink;
+- (void)dumpPathHeader;
+@end
+
+#pragma mark Waypoint
+
+@interface Waypoint : PathHeader {
+    float          lat;
+    float          lon;
+    float          elev;
+    NSDate         *time;
+    float          magvar;
+    float          geoidheight;
+    NSString       *sym;
+    NSString       *fix; // Must be one of: {'none'|'2d'|'3d'|'dgps'|'pps'}
+    unsigned int   sat;
+    float          hdop;
+    float          vdop;
+    float          pdop;
+    float          ageofdgpsdata;
+    unsigned int   dgpsid;
+    // extensions;
+}
+@property float lat;
+@property float lon;
+@property float elev;
+@property (retain) NSDate* time;
+@property float geoidheight;
+@property (retain) NSString* sym;
+@property unsigned int sat;
+@property float hdop;
+@property float vdop;
+@property float pdop;
+@property float ageofdgpsdata;
+
+- (BOOL)setMagvar:(float)inMagvar;
+- (BOOL)setFix:(NSString *)inFix;
+- (BOOL)setDgpsid:(unsigned int)inDgpsid;
+
+- (id)initWithValues: (float)inLat :(float)inLon;
+- (void)dumpWaypoint;
+@end
+
+#pragma mark Route
+
+@interface Route : PathHeader {
+    NSMutableArray *rtept;
+}
+
+@property (retain) NSMutableArray* rtept;
+
 - (void)addWaypoint:(Waypoint *)waypoint;
+- (void)dumpRoute;
 @end
 
 #pragma mark TrekSegment
@@ -202,32 +208,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 @property (retain) NSMutableArray* trekpoints;
 - (void)addWaypoint:(Waypoint *)waypoint;
+- (void)dumpTrekSegment;
 @end
 
 #pragma mark Trek
 
-@interface Trek : NSObject {
-    NSString       *name;
-    NSString       *cmt;
-    NSString       *desc;
-    NSString       *src;
-    NSMutableArray *link;
-    unsigned int   number;
-    NSString       *type;
-    // extensions
+@interface Trek : PathHeader {
     NSMutableArray *trkseg;
 }
-@property (retain) NSString* name;
-@property (retain) NSString* cmt;
-@property (retain) NSString* desc;
-@property (retain) NSString* src;
-@property (retain) NSMutableArray* link;
-@property unsigned int number;
-@property (retain) NSString* type;
+
 @property (retain) NSMutableArray* trekseg;
 
-- (void)addLink: (Link*)newLink;
 - (void)addTrekseg:(TrekSegment*)segment;
+- (void)dumpTrek;
 @end
 
 #pragma mark GPX
@@ -249,4 +242,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - (void) addWaypoint:(Waypoint*) waypoint;
 - (void) addRoute:(Route *) route;
 - (void) addTrek:(Trek*) trek;
+- (void) dumpGPX;
 @end

@@ -48,6 +48,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     return(self);
 }
 
+- (void) dumpLink {
+    NSLog(@"Link: href: %@\n", href);
+    if (text) {
+        NSLog(@"\ttext: %@\n", text);
+    }
+    if (type) {
+        NSLog(@"\ttype: %@\n", type);
+    }
+}
+
 - (void) dealloc
 {
     [href release];
@@ -79,6 +89,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     return(self);
 }
 
+- (void) dumpEmail {
+    NSLog(@"%@@%@\n", user, domain);
+}
+
 - (void) dealloc
 {
     [user release];
@@ -93,6 +107,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @synthesize name;
 @synthesize email;
 @synthesize link;
+
+- (void) dumpAuthor {
+    if (name) {NSLog(@"name: %@\n", name);}
+    if (email) {[email dumpEmail];}
+    if (link) {[link dumpLink];}
+}
 
 - (void) dealloc {
     [name release];
@@ -123,6 +143,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		license = [inLicense retain];
     }
     return(self);
+}
+
+- (void) dumpCopyright {
+    NSLog(@"author: %@\n", author);
+    if (year) {NSLog(@"year: %@\n", year);}
+    if (license) {NSLog(@"license: %@\n", license);}
 }
 
 - (void) dealloc
@@ -162,6 +188,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	[link addObject:newLink];
 }
 
+- (void) dumpMetadata {
+    NSLog(@"Metadata:\n");
+    if (name) {NSLog(@"name: %@\n", name);}
+    if (desc) {NSLog(@"description: %@\n", desc);}
+    if (author) {[author dumpAuthor];}
+    if (copyright) {[copyright dumpCopyright];}
+    if (link) {
+        for (NSUInteger i = 0; i < link.count; i++) {
+            Link *l = [link objectAtIndex:i];
+            [l dumpLink];
+        }
+    }
+    if (time) {NSLog(@"time: %@\n", time);}
+    if (keywords) {NSLog(@"keywords: %@\n", keywords);}
+    if (bounds) {NSLog(@"minlat: %f, minlon: %f, maxlat: %f, maxlon: %f\n", bounds.minlat, bounds.minlon, bounds.maxlat, bounds.maxlon);}
+}
+
 - (void) dealloc {
     [name release];
     [desc release];
@@ -175,6 +218,41 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 @end
 
+#pragma mark PathHeader
+
+@implementation PathHeader
+@synthesize name;
+@synthesize cmt;
+@synthesize desc;
+@synthesize src;
+@synthesize link;
+@synthesize number;
+@synthesize type;
+- (void)addLink:(Link *)newLink {
+    if (link == nil) {
+        link = [[NSMutableArray alloc] init];
+    }
+    [link addObject:newLink];
+}
+- (void) dumpPathHeader {
+    if (name) {NSLog(@"name: %@\n", name);}
+    if (cmt) {NSLog(@"comment: %@\n", cmt);}
+    if (desc) {NSLog(@"description: %@\n", desc);}
+    if (src) {NSLog(@"source: %@\n", src);}
+    if (link) {for(Link *l in link) {[l dumpLink];}}
+    if (number) {NSLog(@"number: %i\n", number);}
+    if (type) {NSLog(@"type: %@\n", type);} 
+}
+- (void) dealloc {
+    [name release];
+    [cmt release];
+    [desc release];
+    [src release];
+    [link release];
+    [type release];
+}
+@end
+
 #pragma mark Waypoint
 
 @implementation Waypoint
@@ -183,35 +261,40 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @synthesize elev;
 @synthesize time;
 @synthesize geoidheight;
-@synthesize name;
-@synthesize cmt;
-@synthesize desc;
-@synthesize src;
-@synthesize link;
 @synthesize sym;
-@synthesize type;
 @synthesize sat;
 @synthesize hdop;
 @synthesize vdop;
 @synthesize pdop;
 @synthesize ageofdgpsdata;
 
-- (void)setMagvar:(float)inMagvar {
-    NSAssert(inMagvar < 0.0 || inMagvar > 360.0, @"The magvar value must be between 0 and 360 degrees");
-    magvar = inMagvar;
+- (BOOL)setMagvar:(float)inMagvar {
+    if (inMagvar >= 0.0 && inMagvar <= 360.0) {
+        magvar = inMagvar;
+        return YES;
+    }
+    return NO;
 }
 
-- (void)setFix:(NSString *)inFix {
+- (BOOL)setFix:(NSString *)inFix {
     BOOL isOption = ([inFix caseInsensitiveCompare:@"none"] || [inFix caseInsensitiveCompare:@"2d"] ||
                      [inFix caseInsensitiveCompare:@"3d"] || [inFix caseInsensitiveCompare:@"dgps"] ||
                      [inFix caseInsensitiveCompare:@"pps"]);
-    NSAssert(isOption, @"The fix must be one of the following: {'none'|'2d'|'3d'|'dgps'|'pps'}");
+    if (isOption) {
+        NSLog(@"Fix must be one of the following: none, 2d, 3d, dgps, pps");
+        return NO;
+    }
     fix = [inFix retain];
+    return YES;
 }
 
-- (void)setDgpsid:(unsigned int)inDgpsid {
-    NSAssert(inDgpsid <= 1023, @"The dgpsid must be less than 1023");
+- (BOOL)setDgpsid:(unsigned int)inDgpsid {
+    if (inDgpsid <= 1023) {
+        NSLog(@"The dgpsid must be less than 1023");
+        return NO;
+    }
     dgpsid = inDgpsid;
+    return YES;
 }
 
 - (id) init {
@@ -228,22 +311,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     return(self);
 }
 
-- (void) addLink:(Link *)newLink {
-	if (link == nil) {
-        link = [[NSMutableArray alloc] init];
-    }
-    [link addObject:newLink];
+- (void) dumpWaypoint {
+    NSLog(@"Waypoint: lat: %f, lon: %f\n", lat, lon);
+    if (elev) {NSLog(@"\tElevation: %f\n", elev);}
+    if (time) {NSLog(@"\tTime: %@\n", time);}
+    [super dumpPathHeader];
+    if (magvar) {NSLog(@"\tMagvar: %f\n", magvar);}
+    if (sym) {NSLog(@"\tSymbol: %@\n", sym);}
+    if (fix) {NSLog(@"\tfix: %@\n", fix);}
+    if (dgpsid) {NSLog(@"\tStationID: %i\n", dgpsid);}
 }
 
 - (void) dealloc {
     [time release];
-    [name release];
-    [cmt release];
-    [desc release];
-    [src release];
-    [link release];
     [sym release];
-    [type release];
     [super dealloc];
 }
 @end
@@ -251,21 +332,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma mark Route
 
 @implementation Route
-@synthesize name;
-@synthesize cmt;
-@synthesize desc;
-@synthesize src;
-@synthesize link;
-@synthesize number;
-@synthesize type;
 @synthesize rtept;
-
-- (void)addLink:(Link *)newLink {
-    if (link == nil) {
-        link = [[NSMutableArray alloc] init];
-    }
-    [link addObject:newLink];
-}
 
 - (void)addWaypoint:(Waypoint *)waypoint {
     if (rtept == nil) {
@@ -274,13 +341,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [rtept addObject:waypoint];
 }
 
+- (void) dumpRoute {
+    NSLog(@"Route:\n");
+    [super dumpPathHeader];
+    if (rtept) {for(Waypoint *p in rtept){[p dumpWaypoint];}}
+}
+
 - (void) dealloc {
-    [name release];
-    [cmt release];
-    [desc release];
-    [src release];
-    [link release];
-    [type release];
     [rtept release];
     [super dealloc];
 }
@@ -297,6 +364,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     }
     [trekpoints addObject:waypoint];
 }
+
+- (void) dumpTrekSegment {
+    NSLog(@"Trek Segment\n");
+    if (trekpoints) {for(Waypoint *p in trekpoints){[p dumpWaypoint];}}
+}
+
 - (void) dealloc {
     [trekpoints release];
     [super dealloc];
@@ -306,21 +379,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma mark Trek
 
 @implementation Trek
-@synthesize name;
-@synthesize cmt;
-@synthesize desc;
-@synthesize src;
-@synthesize link;
-@synthesize number;
-@synthesize type;
 @synthesize trekseg;
-
-- (void)addLink:(Link *)newLink {
-    if (link == nil) {
-        link = [[NSMutableArray alloc] init];
-    }
-    [link addObject:newLink];
-}
 
 - (void)addTrekseg:(TrekSegment *)segment {
     if (trekseg == nil) {
@@ -329,13 +388,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     [trekseg addObject:segment];
 }
 
+- (void) dumpTrek {
+    NSLog(@"Trek:\n");
+    [super dumpPathHeader];
+    if (trekseg) {for(TrekSegment *s in trekseg){[s dumpTrekSegment];}}
+}
+
 - (void) dealloc {
-    [name release];
-    [cmt release];
-    [desc release];
-    [src release];
-    [link release];
-    [type release];
     [trekseg release];
     [super dealloc];
 }
@@ -377,6 +436,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         treks = [[NSMutableArray alloc] init];
     }
     [treks addObject:trek];
+}
+
+- (void) dumpGPX {
+    if (metadata) {
+        [metadata dumpMetadata];
+    }
+    if (waypoints) {
+        for (Waypoint *waypoint in waypoints) {
+            [waypoint dumpWaypoint];
+        }
+    }
+    if (routes) {
+        for (Route *route in routes) {
+            [route dumpRoute];
+        }
+    }
+    if (treks) {
+        for (Trek *trek in treks) {
+            [trek dumpTrek];
+        }
+    }
 }
 
 - (void) dealloc {
