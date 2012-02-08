@@ -319,8 +319,6 @@ void parse_path_header(xmlNode *node, PathHeader *data, NSString *error)
     }
     if (strcasecmp((const char*)node->name, "extension") == 0) {
         // do extension stuff later
-    } else {
-        print_error_message_for_element([error stringByAppendingString:@"extension"]);
     }
 }
 
