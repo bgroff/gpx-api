@@ -127,6 +127,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma mark PathHeader
 
+// This object is a general object that
+// waypoints, routes and treks extend.
+// It is so that they do not need to redefine
+// these fields over again. DO NOT use
+// this class in your code.
 @interface PathHeader : NSObject {
     NSString       *name;
     NSString       *cmt;
@@ -181,8 +186,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @property float ageofdgpsdata;
 
 - (BOOL)setMagvar:(float)inMagvar;
+- (float)getMagvar;
 - (BOOL)setFix:(NSString *)inFix;
+- (NSString*)getFix;
 - (BOOL)setDgpsid:(unsigned int)inDgpsid;
+- (unsigned int)getDgpsid;
 
 - (id)initWithValues: (float)inLat :(float)inLon;
 - (void)dumpWaypoint;

@@ -276,6 +276,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     return NO;
 }
 
+- (float) getMagvar {
+    return magvar;
+}
+
 - (BOOL)setFix:(NSString *)inFix {
     BOOL isOption = ([inFix caseInsensitiveCompare:@"none"] || [inFix caseInsensitiveCompare:@"2d"] ||
                      [inFix caseInsensitiveCompare:@"3d"] || [inFix caseInsensitiveCompare:@"dgps"] ||
@@ -288,6 +292,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     return YES;
 }
 
+- (NSString*) getFix {
+    return fix;
+}
+
 - (BOOL)setDgpsid:(unsigned int)inDgpsid {
     if (inDgpsid <= 1023) {
         NSLog(@"The dgpsid must be less than 1023");
@@ -295,6 +303,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     }
     dgpsid = inDgpsid;
     return YES;
+}
+
+- (unsigned int) getDgpsid {
+    return dgpsid;
 }
 
 - (id) init {
