@@ -40,6 +40,42 @@ void write_waypoint(Waypoint* waypoint, xmlTextWriterPtr writer, NSString *tag);
 void write_links(NSMutableArray *links, xmlTextWriterPtr writer);
 void write_time(NSDate *time, xmlTextWriterPtr writer);
 
+NSString* write_gpx_to_string(GPX *gpx)
+{
+    xmlBufferPtr buffer = write_gpx(gpx);
+    if (!buffer) {
+        return NO;
+    }
+
+    NSString *ret_str = [[NSString alloc] initWithUTF8String:(char*)buffer->content];
+    if (ret_str) {
+        return ret_str;
+    }
+    return nil;
+}
+
+BOOL write_gpx_to_file(GPX *gpx, NSString *file)
+{
+    xmlBufferPtr buffer = write_gpx(gpx);
+    if (!buffer) {
+        return NO;
+    }
+
+    FILE *fp ;
+    fp = fopen([file UTF8String], "w");
+    if (fp) {
+        int ret = xmlBufferDump(fp, buffer);
+        if (ret < 0) {
+            return NO;
+        }
+    } else {
+        return NO;
+    }
+    xmlBufferFree(buffer);
+    fclose(fp);
+    return YES;
+}
+
 xmlBufferPtr write_gpx(GPX *gpx)
 {
     if (!gpx) {
@@ -278,5 +314,6 @@ void write_time(NSDate *time, xmlTextWriterPtr writer)
     [dateFormat setTimeStyle:NSDateFormatterFullStyle];
     [dateFormat setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss'Z'"];
     xmlTextWriterWriteElement(writer, BAD_CAST "time", BAD_CAST [[dateFormat stringFromDate:time] UTF8String]);
+    [dateFormat release];
 }
 

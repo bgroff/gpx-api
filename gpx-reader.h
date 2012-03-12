@@ -25,7 +25,7 @@
 
 #import <libxml/xmlreader.h>
 
-#import "gpx-api.h"
+@class GPX;
 
 // This function takes the root element of a gpx document
 // and an alloc'd and init'd gpx data structure and parses

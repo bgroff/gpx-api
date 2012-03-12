@@ -471,6 +471,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     }
 }
 
+- (NSString*) xmlString {
+    return write_gpx_to_string(self);
+}
+
 - (void) dealloc {
     [version release];
     [creator release];

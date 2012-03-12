@@ -26,10 +26,17 @@
 #import <libxml/encoding.h>
 #import <libxml/xmlwriter.h>
 
-#import "gpx-api.h"
+@class GPX;
 
 // This function takes a GPX data structure and returns
 // and xml document that reprents the data in GPX V1.1 format
 // can return nil, it the GPX data structure is not valid.
 xmlBufferPtr write_gpx(GPX *gpx);
 
+// Takes a GPX data structure, converts it to xml
+// and writes the xml to a file.
+BOOL write_gpx_to_file(GPX *gpx, NSString *file);
+
+// Takes a GPX data structure, converts it to xml
+// returns an NSString that contains the xml.
+NSString* write_gpx_to_string(GPX *gpx);

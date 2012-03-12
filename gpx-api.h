@@ -25,6 +25,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #import <Foundation/Foundation.h>
 
+#import "gpx-writer.h"
+#import "gpx-reader.h"
 
 #pragma mark Link
 
@@ -251,4 +253,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 - (void) addRoute:(Route *) route;
 - (void) addTrek:(Trek*) trek;
 - (void) dumpGPX;
+- (NSString*) xmlString;
 @end
